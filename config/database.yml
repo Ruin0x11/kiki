@@ -1,0 +1,29 @@
+default: &default
+  adapter: postgresql
+  encoding: utf8
+  username: postgres
+
+development:
+  <<: *default
+  database: kiki_development
+  host: localhost
+  password: devpassword
+  timeout: 5000
+
+test:
+  <<: *default
+  database: kiki_test
+  host: localhost
+  password: testpassword
+  min_messages: warning
+  timeout: 5000
+
+production:
+  <<: *default
+  database: kiki_production
+  min_messages: error
+  pool: 30
+  reconnect: true
+  host: kiki_db
+  username: kiki
+  password: kiki
