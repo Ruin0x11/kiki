@@ -24,3 +24,5 @@ end
 gem "faraday", "~> 0.15.4"
 
 gem "faraday_middleware", "~> 0.13.1"
+
+gem "delayed_job", "~> 4.1"

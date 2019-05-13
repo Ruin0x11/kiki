@@ -1,8 +1,13 @@
+require "set"
+require "lib/adaptor"
+
 class Client::Danbooru2Client < Client::BaseClient
   def initialize(domain, username, auth)
     super
 
+    @ada = Adaptor::Danbooru2Adaptor.new
     @conn = Faraday.new(url: "https://#{domain}") do |faraday|
+      faraday.request :json
       faraday.response :json, content_type: /\bjson$/
       faraday.basic_auth username, auth
 
@@ -29,14 +34,84 @@ class Client::Danbooru2Client < Client::BaseClient
   end
 
   def get_post(id)
-    @conn.get "/posts/#{id}.json"
+    r = @conn.get "/posts/#{id}.json"
+    Result.make(r) do |resp|
+      Post.new(source: resp.body["large_file_url"],
+	       tags: resp.body["tags"],
+	       rating: resp.body["rating"])
+    end
+  end
+
+  def upload_post(post)
+    params = { "source" => post.source, "tags" => post.tags, "rating" => post.rating }
+    params["parent_id"] = post.parent_id unless post.parent_id.nil?
+
+    r = @conn.post "/wiki_pages.json", params
+    Result.make(r) { |resp| @ada.post(resp) }
+  end
+
+  def get_tag(id)
+    r = @conn.get "/tags/#{id}.json"
+    Result.make(r) { |resp| @ada.post(resp) }
+  end
+
+  def find_tag_by_name(name)
+    r = @conn.get "/tags.json", { "search" => { "name" => name } }
+    Result.make(r) { |resp| @ada.tag(resp) }
+  end
+
+  def create_tag(tag)
+    r = @conn.post "/tags.json", { "name" => tag.name, "category" => tag.category }
+    Result.make(r) { |resp| @ada.tag(resp) }
   end
 
   def get_wiki_page(id)
-    @conn.get "/wiki_pages/#{id}.json"
+    r = @conn.get "/wiki_pages/#{id}.json"
+    Result.make(r) { |resp| @ada.wiki_page(resp) }
+  end
+
+  def find_wiki_page_by_name(name)
+    r = @conn.get "/wiki_pages.json", { "search" => { "name_matches" => name } }
+    Result.make(r) { |resp| @ada.wiki_page(resp) }
+  end
+
+  def create_wiki_page(wiki_page)
+    r = @conn.post "/wiki_pages.json", { "title" => wiki_page.title, "body" => "#{wiki_page.body}\n\n#{pool_metadata(wiki_page.url)}", "other_names" => wiki_page.other_names }
+    Result.make(r) { |resp| @ada.wiki_page(resp) }
   end
 
   def get_pool(id)
-    @conn.get "/pools/#{id}.json"
+    r = @conn.get "/pools/#{id}.json"
+    Result.make(r) { |resp| @ada.pool(resp) }
+  end
+
+  def find_pool_by_name(name)
+    r = @conn.get "/pools.json", { "search" => { "name_matches" => name } }
+    Result.make(r) { |resp| @ada.pool(resp) }
+  end
+
+  def find_pool_by_source(source)
+    r = @conn.get "/pools.json", { "search" => { "description_matches" => pool_metadata(source) } }
+    Result.make(r) { |resp| @ada.pool(resp) }
+  end
+
+  def create_pool(pool)
+    r = @conn.post "/pools.json", { "name" => pool.name, "description" => "#{pool.description}\n\n#{pool_metadata(pool.url)}", "category" => pool.category }
+    Result.make(r) { |resp| @ada.pool(resp) }
+  end
+
+  def add_posts_to_pool(id, to_add)
+    pool = get_pool id
+    return pool.result unless pool.success?
+
+    post_ids = pool
+      .post_ids
+      .split(" ")
+      .map(&:to_i)
+      .to_set
+      .union(to_add)
+
+    r = @conn.put "/pools/#{id}.json", {"post_ids" => post_ids.to_a.join(" ")}
+    Result.make(r) { |resp| @ada.pool(resp) }
   end
 end
