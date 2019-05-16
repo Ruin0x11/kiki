@@ -2,6 +2,8 @@ require "set"
 require "lib/adaptor"
 
 class Client::Danbooru2Client < Client::BaseClient
+  attr_reader :conn
+
   def initialize(domain, username, auth)
     super
 
@@ -35,11 +37,7 @@ class Client::Danbooru2Client < Client::BaseClient
 
   def get_post(id)
     r = @conn.get "/posts/#{id}.json"
-    Result.make(r) do |resp|
-      Post.new(source: resp.body["large_file_url"],
-	       tags: resp.body["tags"],
-	       rating: resp.body["rating"])
-    end
+    Result.make(r) { |resp| @ada.post(resp) }
   end
 
   def upload_post(post)
@@ -52,7 +50,7 @@ class Client::Danbooru2Client < Client::BaseClient
 
   def get_tag(id)
     r = @conn.get "/tags/#{id}.json"
-    Result.make(r) { |resp| @ada.post(resp) }
+    Result.make(r) { |resp| @ada.tag(resp) }
   end
 
   def find_tag_by_name(name)

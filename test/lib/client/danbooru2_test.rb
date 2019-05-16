@@ -1,0 +1,88 @@
+# -*- coding: utf-8 -*-
+require "test_helper"
+
+class Client::Danbooru2ClientTest < BaseTest
+  def setup
+    @client = Client::Danbooru2Client.new "danbooru.donmai.us", "ruin", "auth"
+  end
+
+  def setup_response(fixture, url)
+    body = read_fixture(fixture)
+
+    env = stub
+    env.expects(:url).returns("the_url")
+
+    response = stub
+    response.expects(:success?).returns(true)
+    response.expects(:body).at_least_once.returns(body)
+    response.expects(:env).returns(env)
+    @client.conn.expects(:get).with(url).returns(response)
+  end
+
+  def setup_failure_response(url)
+    response = stub
+    response.expects(:success?).returns(false)
+    @client.conn.expects(:get).with(url).returns(response)
+  end
+
+  def test_get_post
+    setup_response "danbooru2/post.json", "/posts/1077187.json"
+
+    post = @client.get_post(1077187)
+
+    assert_equal 1077187, post.id
+    assert_equal "the_url", post.url
+    assert_equal "https://raikou2.donmai.us/f6/fe/f6fe71488d890586afda9ee610f103c9.jpg", post.source
+    assert_equal 30, post.tags.length
+    assert_instance_of String, post.tags.first
+    assert_equal "s", post.rating
+  end
+
+  def test_get_post_failure
+    setup_failure_response "/posts/1.json"
+
+    post = @client.get_post(1)
+
+    assert_equal false, post.success?
+  end
+
+  def test_get_wiki_page
+    setup_response "danbooru2/wiki_page.json", "/wiki_pages/32524.json"
+
+    wiki_page = @client.get_wiki_page(32524)
+
+    assert_equal 32524, wiki_page.id
+    assert_equal "the_url", wiki_page.url
+    assert_equal "kiki", wiki_page.title
+    assert_equal 246, wiki_page.body.length
+    assert_equal ["キキ"], wiki_page.other_names
+  end
+
+  def test_get_tag
+    setup_response "danbooru2/tag.json", "/tags/4579.json"
+
+    tag = @client.get_tag(4579)
+
+    assert_equal 4579, tag.id
+    assert_equal "the_url", tag.url
+    assert_equal "kiki", tag.name
+    assert_equal :character, tag.category
+  end
+
+  def test_get_pool
+    setup_response "danbooru2/pool.json", "/pools/3780.json"
+
+    pool = @client.get_pool(3780)
+
+    assert_equal 3780, pool.id
+    assert_equal "the_url", pool.url
+    assert_equal "Your Shipment Has Arrived", pool.name
+    assert_equal "collection", pool.category
+    assert_equal 93, pool.description.length
+    assert_equal 170, pool.post_ids.length
+    assert_instance_of Integer, pool.post_ids.first
+  end
+
+  def test_create_post
+  end
+end

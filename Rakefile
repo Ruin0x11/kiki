@@ -5,7 +5,11 @@ require 'sinatra/activerecord/rake'
 require 'rake/testtask'
 
 Rake::TestTask.new do |t|
-  t.pattern = "test/*_test.rb"
+  t.pattern = "test/**/*_test.rb"
+  t.libs << "."
+  t.libs << "lib"
+  t.libs << "kiki"
+  t.libs << "test"
 end
 
 namespace :db do
@@ -14,3 +18,5 @@ namespace :db do
     puts 'Reseeding completed.'
   end
 end
+
+task default: [:test]
