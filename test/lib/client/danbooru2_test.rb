@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 require "test_helper"
 
+require "client"
+
 class Client::Danbooru2ClientTest < BaseTest
   def setup
     @client = Client::Danbooru2Client.new "danbooru.donmai.us", "ruin", "auth"
@@ -23,6 +25,19 @@ class Client::Danbooru2ClientTest < BaseTest
     response = stub
     response.expects(:success?).returns(false)
     @client.conn.expects(:get).with(url).returns(response)
+  end
+
+  def setup_request(fixture, url, req)
+    body = read_fixture(fixture)
+
+    env = stub
+    env.expects(:url).returns("the_url")
+
+    response = stub
+    response.expects(:success?).returns(true)
+    response.expects(:body).at_least_once.returns(body)
+    response.expects(:env).returns(env)
+    @client.conn.expects(:post).with(url, req).returns(response)
   end
 
   def test_get_post
@@ -83,6 +98,63 @@ class Client::Danbooru2ClientTest < BaseTest
     assert_instance_of Integer, pool.post_ids.first
   end
 
-  def test_create_post
+  def test_upload_post
+    expected = {
+      "source" => "https://source/file.png",
+      "tag_string" => "tag1 tag2 tag3",
+      "rating" => "s"
+    }
+    setup_request "danbooru2/post.json", "/uploads.json", expected
+
+    post = Post.new(id: 1,
+		    url: "https://source/posts/1",
+		    source: "https://source/file.png",
+		    tags: ["tag1", "tag2", "tag3"],
+		    rating: "s",
+		    parent_id: nil)
+
+    upload = @client.upload_post(post)
+
+    fail
+  end
+
+  def test_upload_post_parent_id
+    expected = {
+      "source" => "https://source/file.png",
+      "tag_string" => "tag1 tag2 tag3",
+      "rating" => "s",
+      "parent_id" => 1
+    }
+    setup_request "danbooru2/post.json", "/uploads.json", expected
+
+    post = Post.new(id: 2,
+		    url: "https://source/posts/1",
+		    source: "https://source/file.png",
+		    tags: ["tag1", "tag2", "tag3"],
+		    rating: "s",
+		    parent_id: 1)
+
+    upload = @client.upload_post(post)
+
+    fail
+  end
+
+  def test_create_wiki_page
+    expected = {
+      "title" => "The Title",
+      "body" => "body/n/n(Kiki metadata - Source|https://source/wiki_pages/1)",
+      "other_names" => ["name1", "name2"]
+    }
+    setup_request "danbooru2/wiki_page.json", "/uploads.json", expected
+
+    wiki_page = WikiPage.new(id: 1,
+			     url: "https://source/wiki_pages/1",
+			     title: "Title",
+			     body: "body",
+			     other_names: ["name1", "name2"])
+
+    result = @client.create_wiki_page(wiki_page)
+
+    assert_equal 1, result.id
   end
 end

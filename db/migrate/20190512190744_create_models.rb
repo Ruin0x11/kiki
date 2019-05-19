@@ -13,10 +13,11 @@ class CreateModels < ActiveRecord::Migration[5.2]
       t.integer :user_id, null: false
       t.integer :server_from_id, null: false
       t.integer :server_to_id, null: false
-      t.string :url, null: false
+      t.string :url
       t.integer :url_type, null: false
       t.integer :url_id, null: false
       t.boolean :finished, null: false
+      t.integer :pool_id
       t.string :pools
     end
 

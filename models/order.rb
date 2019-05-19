@@ -10,6 +10,7 @@ class Order < ActiveRecord::Base
   before_validation :parse_url
   after_create :queue
 
+  validates_presence_of :server_from, :server_to
   validate :servers_are_different
   validates_presence_of :url_type, :url_id
 
@@ -36,8 +37,9 @@ class Order < ActiveRecord::Base
   end
 
   def parse_url
+    return if self.url_type and self.url_id
+
     data = server_from.client.parse_uri(url)
-    pp data
     self.url_type = data[:type]
     self.url_id = data[:id]
   end

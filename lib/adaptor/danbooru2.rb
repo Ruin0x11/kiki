@@ -8,11 +8,15 @@ class Adaptor::Danbooru2Adaptor < Adaptor::BaseAdaptor
   end
 
   def wiki_page(resp)
+    result = resp.body
+    if Array === result
+      result = result.first
+    end
     WikiPage.new(url: resp.env.url.to_s,
-		 id: resp.body["id"],
-		 title: resp.body["title"],
-		 body: resp.body["body"],
-		 other_names: resp.body["other_names"])
+		 id: result["id"],
+		 title: result["title"],
+		 body: result["body"],
+		 other_names: result["other_names"])
   end
 
   def tag_category(category)
@@ -31,18 +35,26 @@ class Adaptor::Danbooru2Adaptor < Adaptor::BaseAdaptor
   end
 
   def tag(resp)
+    result = resp.body
+    if Array === result
+      result = result.first
+    end
     Tag.new(url: resp.env.url.to_s,
-	    id: resp.body["id"],
-	    name: resp.body["name"],
-	    category: tag_category(resp.body["category"]))
+	    id: result["id"],
+	    name: result["name"],
+	    category: tag_category(result["category"]))
   end
 
   def pool(resp)
+    result = resp.body
+    if Array === result
+      result = result.first
+    end
     Pool.new(url: resp.env.url.to_s,
-	     id: resp.body["id"],
-	     name: resp.body["name"].gsub("_", " "),
-	     description: resp.body["description"],
-	     category: resp.body["category"],
-	     post_ids: resp.body["post_ids"])
+	     id: result["id"],
+	     name: result["name"].gsub("_", " "),
+	     description: result["description"],
+	     category: result["category"],
+	     post_ids: result["post_ids"])
   end
 end

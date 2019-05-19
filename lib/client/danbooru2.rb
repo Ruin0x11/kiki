@@ -41,10 +41,10 @@ class Client::Danbooru2Client < Client::BaseClient
   end
 
   def upload_post(post)
-    params = { "source" => post.source, "tags" => post.tags, "rating" => post.rating }
+    params = { "source" => post.source, "tag_string" => post.tags.join(" "), "rating" => post.rating }
     params["parent_id"] = post.parent_id unless post.parent_id.nil?
 
-    r = @conn.post "/wiki_pages.json", params
+    r = @conn.post "/uploads.json", params
     Result.make(r) { |resp| @ada.post(resp) }
   end
 
@@ -69,12 +69,12 @@ class Client::Danbooru2Client < Client::BaseClient
   end
 
   def find_wiki_page_by_name(name)
-    r = @conn.get "/wiki_pages.json", { "search" => { "name_matches" => name } }
+    r = @conn.get "/wiki_pages.json", { "search" => { "title" => name } }
     Result.make(r) { |resp| @ada.wiki_page(resp) }
   end
 
   def create_wiki_page(wiki_page)
-    r = @conn.post "/wiki_pages.json", { "title" => wiki_page.title, "body" => "#{wiki_page.body}\n\n#{pool_metadata(wiki_page.url)}", "other_names" => wiki_page.other_names }
+    r = @conn.post "/wiki_pages.json", { "title" => wiki_page.title, "body" => "#{wiki_page.body}\n\n#{pool_metadata(wiki_page.url)}", "other_names" => wiki_page.other_names.join(" ") }
     Result.make(r) { |resp| @ada.wiki_page(resp) }
   end
 
@@ -83,10 +83,10 @@ class Client::Danbooru2Client < Client::BaseClient
     Result.make(r) { |resp| @ada.pool(resp) }
   end
 
-  def find_pool_by_name(name)
-    r = @conn.get "/pools.json", { "search" => { "name_matches" => name } }
-    Result.make(r) { |resp| @ada.pool(resp) }
-  end
+  # def find_pool_by_name(name)
+  #   r = @conn.get "/pools.json", { "search" => { "name_matches" => name } }
+  #   Result.make(r) { |resp| @ada.pool(resp) }
+  # end
 
   def find_pool_by_source(source)
     r = @conn.get "/pools.json", { "search" => { "description_matches" => pool_metadata(source) } }
@@ -98,7 +98,7 @@ class Client::Danbooru2Client < Client::BaseClient
     Result.make(r) { |resp| @ada.pool(resp) }
   end
 
-  def add_posts_to_pool(id, to_add)
+  def add_post_to_pool(id, to_add)
     pool = get_pool id
     return pool.result unless pool.success?
 
@@ -107,7 +107,7 @@ class Client::Danbooru2Client < Client::BaseClient
       .split(" ")
       .map(&:to_i)
       .to_set
-      .union(to_add)
+      .unshift(id)
 
     r = @conn.put "/pools/#{id}.json", {"post_ids" => post_ids.to_a.join(" ")}
     Result.make(r) { |resp| @ada.pool(resp) }
