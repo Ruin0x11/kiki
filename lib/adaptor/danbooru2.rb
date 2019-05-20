@@ -7,6 +7,14 @@ class Adaptor::Danbooru2Adaptor < Adaptor::BaseAdaptor
 	     rating: resp.body["rating"])
   end
 
+  def upload(resp)
+    Post.new(url: resp.env.url.to_s,
+	     id: resp.body["post_id"],
+	     source: resp.body["source"],
+	     tags: resp.body["tag_string"].split(" "),
+	     rating: resp.body["rating"])
+  end
+
   def wiki_page(resp)
     result = resp.body
     if Array === result

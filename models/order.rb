@@ -1,7 +1,6 @@
 class Order < ActiveRecord::Base
   enum url_type: [:post, :wiki_page, :pool]
-
-  has_many :receipts
+  enum status: [:success, :timeout, :failure, :queued, :pending]
 
   belongs_to :user
   belongs_to :server_from, class_name: "Server"
@@ -16,18 +15,20 @@ class Order < ActiveRecord::Base
 
   def queue
     Delayed::Job.enqueue self
-  end
 
-  def perform
-    result, message = Processor.new(self).process!
-    self.finished = result == :success
-
-    Receipt.create!(order: self, result: result, message: message)
+    self.status = :queued
     save!
   end
 
-  def latest_receipt
-    Receipt.where(order: self).order_by(created_at: :desc).first
+  def perform
+    self.status = :pending
+    save!
+
+    result, message = Processor.new(self).process!
+
+    self.status = result
+    self.message = message
+    save!
   end
 
   private

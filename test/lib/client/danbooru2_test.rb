@@ -104,7 +104,7 @@ class Client::Danbooru2ClientTest < BaseTest
       "tag_string" => "tag1 tag2 tag3",
       "rating" => "s"
     }
-    setup_request "danbooru2/post.json", "/uploads.json", expected
+    setup_request "danbooru2/upload.json", "/uploads.json", expected
 
     post = Post.new(id: 1,
 		    url: "https://source/posts/1",
@@ -115,7 +115,11 @@ class Client::Danbooru2ClientTest < BaseTest
 
     upload = @client.upload_post(post)
 
-    fail
+    assert_equal "the_url", upload.url
+    assert_equal 1, upload.id
+    assert_equal "", upload.source
+    assert_equal "", upload.tags
+    assert_equal "s", upload.rating
   end
 
   def test_upload_post_parent_id
@@ -125,7 +129,7 @@ class Client::Danbooru2ClientTest < BaseTest
       "rating" => "s",
       "parent_id" => 1
     }
-    setup_request "danbooru2/post.json", "/uploads.json", expected
+    setup_request "danbooru2/upload.json", "/uploads.json", expected
 
     post = Post.new(id: 2,
 		    url: "https://source/posts/1",
@@ -136,25 +140,29 @@ class Client::Danbooru2ClientTest < BaseTest
 
     upload = @client.upload_post(post)
 
-    fail
+    assert_equal "the_url", upload.url
+    assert_equal 1, upload.id
+    assert_equal "", upload.source
+    assert_equal "", upload.tags
+    assert_equal "s", upload.rating
   end
 
   def test_create_wiki_page
     expected = {
       "title" => "The Title",
-      "body" => "body/n/n(Kiki metadata - Source|https://source/wiki_pages/1)",
-      "other_names" => ["name1", "name2"]
+      "body" => "body\n\n(Kiki metadata - Source|https://source/wiki_pages/1)",
+      "other_names" => "name1 name2"
     }
-    setup_request "danbooru2/wiki_page.json", "/uploads.json", expected
+    setup_request "danbooru2/wiki_page.json", "/wiki_pages.json", expected
 
     wiki_page = WikiPage.new(id: 1,
 			     url: "https://source/wiki_pages/1",
-			     title: "Title",
+			     title: "The Title",
 			     body: "body",
 			     other_names: ["name1", "name2"])
 
     result = @client.create_wiki_page(wiki_page)
 
-    assert_equal 1, result.id
+    assert_equal 32524, result.id
   end
 end

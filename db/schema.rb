@@ -34,17 +34,13 @@ ActiveRecord::Schema.define(version: 2019_05_13_205058) do
     t.integer "user_id", null: false
     t.integer "server_from_id", null: false
     t.integer "server_to_id", null: false
-    t.string "url", null: false
+    t.string "url"
     t.integer "url_type", null: false
     t.integer "url_id", null: false
-    t.boolean "finished", null: false
-  end
-
-  create_table "receipts", force: :cascade do |t|
-    t.bigint "order_id", null: false
-    t.integer "result", null: false
+    t.integer "status", null: false
     t.string "message"
-    t.index ["order_id"], name: "index_receipts_on_order_id"
+    t.integer "pool_id"
+    t.string "pools"
   end
 
   create_table "servers", force: :cascade do |t|

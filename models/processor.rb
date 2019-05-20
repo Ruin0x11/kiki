@@ -32,13 +32,9 @@ class Processor
 
     resp = @client_from.get_post(id)
     return failure "could not find post '#{id}' in source", resp unless resp.success?
+    post = resp.result
 
-    post = resp
-    source = post.source
-    tags = post.tags
-    rating = post.rating
-
-    tags.each do |tag|
+    post.tags.each do |tag|
       # tag
       unless @client_to.find_tag_by_name(tag).success?
 	resp = @client_from.find_tag_by_name(tag)
@@ -59,12 +55,12 @@ class Processor
     end
 
     resp = @client_to.upload_post(post)
-    return failure "could not upload post '#{source}' to sink", resp unless resp.success?
-    post = resp.result
+    return failure "could not upload post '#{post.source}' to sink", resp unless resp.success?
+    upload = resp.result
 
     if pool_id != nil
-      resp = @client_to.add_post_to_pool(pool_id, post)
-      return failure "could not add post '#{source}' to pool '#{pool_id}' in sink", resp unless resp.success?
+      resp = @client_to.add_post_to_pool(pool_id, upload)
+      return failure "could not add post '#{post.source}' to pool '#{pool_id}' in sink", resp unless resp.success?
     end
 
     [:success, nil, resp]

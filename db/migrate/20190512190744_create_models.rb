@@ -16,15 +16,10 @@ class CreateModels < ActiveRecord::Migration[5.2]
       t.string :url
       t.integer :url_type, null: false
       t.integer :url_id, null: false
-      t.boolean :finished, null: false
       t.integer :pool_id
-      t.string :pools
-    end
-
-    create_table :receipts do |t|
-      t.references :order, null: false
-      t.integer :result, null: false
+      t.integer :status, null: false
       t.string :message
+      t.string :pools
     end
 
     create_table :users do |t|

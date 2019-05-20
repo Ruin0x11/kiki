@@ -45,7 +45,8 @@ class Client::Danbooru2Client < Client::BaseClient
     params["parent_id"] = post.parent_id unless post.parent_id.nil?
 
     r = @conn.post "/uploads.json", params
-    Result.make(r) { |resp| @ada.post(resp) }
+    return Result.failure(r) unless r.body["status"] == "completed"
+    Result.make(r) { |resp| @ada.upload(resp) }
   end
 
   def get_tag(id)
@@ -55,6 +56,7 @@ class Client::Danbooru2Client < Client::BaseClient
 
   def find_tag_by_name(name)
     r = @conn.get "/tags.json", { "search" => { "name" => name } }
+    return Result.failure(r) if r.body.empty?
     Result.make(r) { |resp| @ada.tag(resp) }
   end
 
@@ -70,6 +72,7 @@ class Client::Danbooru2Client < Client::BaseClient
 
   def find_wiki_page_by_name(name)
     r = @conn.get "/wiki_pages.json", { "search" => { "title" => name } }
+    return Result.failure(r) if r.body.empty?
     Result.make(r) { |resp| @ada.wiki_page(resp) }
   end
 
