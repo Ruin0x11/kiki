@@ -12,17 +12,20 @@ class Kiki < Sinatra::Base
     halt 400, "BADSESSION\n" if user.nil?
 
     server_from = Server.find_matching(url)
-    server_to = Server.find_matching("http://megucabooru.nori.dev")
+    server_to = Server.find_matching("http://bijutsu.nori.daikon")
 
-    halt 400, "FAILED Bad server\n" if server_from.nil? or server_to.nil?
+    halt 400, "FAILED Bad server from\n" if server_from.nil?
+    halt 400, "FAILED Bad server to\n" if server_to.nil?
 
     order = Order.create(user: user,
 			 server_from: server_from,
 			 server_to: server_to,
 			 url: url,
-			 finished: false)
+			 status: :created)
 
     halt 400, "FAILED Order: #{order.errors.full_messages.join(",")}\n" unless order.valid?
+
+    puts "created order: #{url}"
 
     "OK\n"
   end

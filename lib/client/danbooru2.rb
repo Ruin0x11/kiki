@@ -21,7 +21,7 @@ class Client::Danbooru2Client < Client::BaseClient
 
   def parse_uri(uri)
     uri = URI.parse(uri) unless URI === uri
-    return {type: nil, id: nil} unless @domain == uri.host
+    return {type: nil, id: nil} unless URI.parse(@domain).host == uri.host
 
     m = uri.path.match(/posts\/([0-9]+)$/)
     return {type: :post, id: m[1].to_i} if m
@@ -49,11 +49,10 @@ class Client::Danbooru2Client < Client::BaseClient
   end
 
   def upload_post(post)
-    params = { "source" => post.source, "tag_string" => post.tags.join(" "), "rating" => post.rating }
+    params = { "source" => post.source, "tag_string" => post.tags.join(" "), "rating" => post.rating.to_s }
     params["parent_id"] = post.parent_id unless post.parent_id.nil?
 
     r = @conn.post "/uploads.json", params
-    return Result.failure(r) unless r.body["status"] == "completed"
     Result.make(r) { |resp| @ada.upload(resp) }
   end
 

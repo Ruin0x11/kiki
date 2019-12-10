@@ -15,17 +15,19 @@ ActiveRecord::Schema.define(version: 2019_05_13_205058) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "delayed_jobs", force: :cascade do |t|
-    t.integer "priority", default: 0
-    t.integer "attempts", default: 0
-    t.text "handler"
-    t.string "last_error"
+  create_table "delayed_jobs", id: :serial, force: :cascade do |t|
+    t.integer "priority", default: 0, null: false
+    t.integer "attempts", default: 0, null: false
+    t.text "handler", null: false
+    t.text "last_error"
     t.datetime "run_at"
     t.datetime "locked_at"
     t.datetime "failed_at"
     t.string "locked_by"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.string "queue"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 
   create_table "orders", force: :cascade do |t|
@@ -37,9 +39,9 @@ ActiveRecord::Schema.define(version: 2019_05_13_205058) do
     t.string "url"
     t.integer "url_type", null: false
     t.integer "url_id", null: false
+    t.integer "pool_id"
     t.integer "status", null: false
     t.string "message"
-    t.integer "pool_id"
     t.string "pools"
   end
 

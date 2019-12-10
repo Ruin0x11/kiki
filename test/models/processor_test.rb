@@ -9,6 +9,11 @@ class ProcessorTest < BaseTest
     @client_from = stub
     @client_to = stub
 
+    @client_from.stubs(:has_wiki_pages?).returns(true)
+    @client_from.stubs(:has_pools?).returns(true)
+    @client_to.stubs(:has_wiki_pages?).returns(true)
+    @client_to.stubs(:has_pools?).returns(true)
+
     @p = Processor.new @order, @client_from, @client_to
   end
 
@@ -104,7 +109,7 @@ class ProcessorTest < BaseTest
 		      id: 1,
 		      source: "https://source/file.png",
 		      tags: ["tag1"],
-		      rating: "s")
+		      rating: :s)
       @client_from.expects(:get_post).returns(success(post))
     end
 

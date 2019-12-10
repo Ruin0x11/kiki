@@ -2,12 +2,13 @@ require "uri"
 require "lib/client"
 
 class Server < ActiveRecord::Base
-  enum api_type: [:danbooru, :danbooru2, :gelbooru]
+  enum api_type: [:danbooru, :danbooru2, :gelbooru, :szurubooru]
 
   has_many :orders
 
   def self.find_matching(url)
-    Server.find_by_domain(URI.parse(url).host)
+    uri = URI.parse(url)
+    Server.find_by_domain(uri.scheme + "://" + uri.host)
   end
 
   def client
@@ -18,6 +19,8 @@ class Server < ActiveRecord::Base
      Client::Danbooru2Client.new(domain, username, auth)
 		 when :gelbooru
      Client::GelbooruClient.new(domain, username, auth)
+		 when :szurubooru
+     Client::SzurubooruClient.new(domain, username, auth)
 		 end
   end
 end

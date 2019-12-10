@@ -69,6 +69,10 @@ class Processor
   end
 
   def copy_wiki_page(id)
+    if !@client_to.has_wiki_pages?
+      return [:failure, "no wiki page support", nil]
+    end
+
     resp = @client_from.get_wiki_page(id)
     return failure "could not find wiki page '#{id}' in source", resp unless resp.success?
 
@@ -80,19 +84,23 @@ class Processor
   end
 
   def copy_pool(id)
-    resp = @client_from.get_pool(id)
-    return failure "could not find pool '#{id}' in source", resp unless resp.success?
+    pool_id = nil
+    resp = nil
+    if @client_to.has_pools?
+      resp = @client_from.get_pool(id)
+      return failure "could not find pool '#{id}' in source", resp unless resp.success?
 
-    pool = resp
-    resp = @client_to.create_pool(pool)
-    return failure "could not create pool '#{pool.title}' in sink", resp unless resp.success?
+      pool_id = resp.id
+      resp = @client_to.create_pool(pool)
+      return failure "could not create pool '#{pool.title}' in sink", resp unless resp.success?
+    end
 
     pool.post_ids.each do |post_id|
       Order.create!(server_from: @order.server_from,
 		    server_to: @order.server_to,
 		    uri_type: :post,
 		    uri_id: post_id,
-		    pool_id: pool.id)
+		    pool_id: pool_id)
     end
 
     [:success, nil, resp]

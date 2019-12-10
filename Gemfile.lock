@@ -25,8 +25,11 @@ GEM
     bcrypt (3.1.12)
     byebug (11.0.1)
     concurrent-ruby (1.1.5)
-    delayed_job (4.1.5)
-      activesupport (>= 3.0, < 5.3)
+    delayed_job (4.1.8)
+      activesupport (>= 3.0, < 6.1)
+    delayed_job_active_record (4.1.4)
+      activerecord (>= 3.0, < 6.1)
+      delayed_job (>= 3.0, < 5)
     factory_bot (5.0.2)
       activesupport (>= 4.2.0)
     faraday_middleware (0.13.1)
@@ -85,7 +88,7 @@ PLATFORMS
 DEPENDENCIES
   bcrypt (~> 3.1)
   byebug (~> 11.0)
-  delayed_job (~> 4.1)
+  delayed_job_active_record (~> 4.1)
   factory_bot (~> 5.0)
   faraday!
   faraday_middleware (~> 0.13.1)

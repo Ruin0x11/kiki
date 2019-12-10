@@ -1,6 +1,6 @@
 class Order < ActiveRecord::Base
   enum url_type: [:post, :wiki_page, :pool]
-  enum status: [:success, :timeout, :failure, :queued, :pending]
+  enum status: [:success, :timeout, :failure, :queued, :pending, :created]
 
   belongs_to :user
   belongs_to :server_from, class_name: "Server"
@@ -14,6 +14,8 @@ class Order < ActiveRecord::Base
   validates_presence_of :url_type, :url_id
 
   def queue
+    puts "queuing job #{self.id}: #{self.url}"
+
     Delayed::Job.enqueue self
 
     self.status = :queued
@@ -21,6 +23,8 @@ class Order < ActiveRecord::Base
   end
 
   def perform
+    puts "running job #{self.id}: #{self.url}"
+
     self.status = :pending
     save!
 
@@ -29,6 +33,8 @@ class Order < ActiveRecord::Base
     self.status = result
     self.message = message
     save!
+
+    puts "job result #{self.id}: #{self.status} #{self.message}"
   end
 
   private

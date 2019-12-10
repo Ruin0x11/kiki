@@ -5,25 +5,25 @@ require "client"
 
 class Client::Danbooru2ClientTest < BaseTest
   def setup
-    @client = Client::Danbooru2Client.new "danbooru.donmai.us", "ruin", "auth"
+    @client = Client::Danbooru2Client.new "https://danbooru.donmai.us", "ruin", "auth"
   end
 
   def setup_response(fixture, url)
     body = read_fixture(fixture)
 
     env = stub
-    env.expects(:url).returns("the_url")
+    env.stubs(:url).returns("the_url")
 
     response = stub
-    response.expects(:success?).returns(true)
-    response.expects(:body).at_least_once.returns(body)
-    response.expects(:env).returns(env)
+    response.stubs(:success?).returns(true)
+    response.stubs(:body).at_least_once.returns(body)
+    response.stubs(:env).returns(env)
     @client.conn.expects(:get).with(url).returns(response)
   end
 
   def setup_failure_response(url)
     response = stub
-    response.expects(:success?).returns(false)
+    response.stubs(:success?).returns(false)
     @client.conn.expects(:get).with(url).returns(response)
   end
 
@@ -31,12 +31,12 @@ class Client::Danbooru2ClientTest < BaseTest
     body = read_fixture(fixture)
 
     env = stub
-    env.expects(:url).returns("the_url")
+    env.stubs(:url).returns("the_url")
 
     response = stub
-    response.expects(:success?).returns(true)
-    response.expects(:body).at_least_once.returns(body)
-    response.expects(:env).returns(env)
+    response.stubs(:success?).returns(true)
+    response.stubs(:body).at_least_once.returns(body)
+    response.stubs(:env).returns(env)
     @client.conn.expects(:post).with(url, req).returns(response)
   end
 
@@ -47,10 +47,11 @@ class Client::Danbooru2ClientTest < BaseTest
 
     assert_equal 1077187, post.id
     assert_equal "the_url", post.url
-    assert_equal "https://raikou2.donmai.us/f6/fe/f6fe71488d890586afda9ee610f103c9.jpg", post.source
+    assert_equal "http://img04.pixiv.net/img/syounen_no_uta/24425315.jpg", post.source
+    assert_equal "https://raikou2.donmai.us/f6/fe/f6fe71488d890586afda9ee610f103c9.jpg", post.image_url
     assert_equal 30, post.tags.length
     assert_instance_of String, post.tags.first
-    assert_equal "s", post.rating
+    assert_equal :s, post.rating
   end
 
   def test_get_post_failure
@@ -110,16 +111,17 @@ class Client::Danbooru2ClientTest < BaseTest
 		    url: "https://source/posts/1",
 		    source: "https://source/file.png",
 		    tags: ["tag1", "tag2", "tag3"],
-		    rating: "s",
+		    rating: :s,
 		    parent_id: nil)
 
     upload = @client.upload_post(post)
 
+    assert_equal true, upload.success?
     assert_equal "the_url", upload.url
     assert_equal 1, upload.id
-    assert_equal "", upload.source
-    assert_equal "", upload.tags
-    assert_equal "s", upload.rating
+    assert_equal "http://img04.pixiv.net/img/syounen_no_uta/24425315.jpg", upload.source
+    assert_equal ["1girl", "amazon_(company)"], upload.tags
+    assert_equal :s, upload.rating
   end
 
   def test_upload_post_parent_id
@@ -135,16 +137,16 @@ class Client::Danbooru2ClientTest < BaseTest
 		    url: "https://source/posts/1",
 		    source: "https://source/file.png",
 		    tags: ["tag1", "tag2", "tag3"],
-		    rating: "s",
+		    rating: :s,
 		    parent_id: 1)
 
     upload = @client.upload_post(post)
 
     assert_equal "the_url", upload.url
     assert_equal 1, upload.id
-    assert_equal "", upload.source
-    assert_equal "", upload.tags
-    assert_equal "s", upload.rating
+    assert_equal "http://img04.pixiv.net/img/syounen_no_uta/24425315.jpg", upload.source
+    assert_equal ["1girl", "amazon_(company)"], upload.tags
+    assert_equal :s, upload.rating
   end
 
   def test_create_wiki_page

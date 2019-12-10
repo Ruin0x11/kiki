@@ -1,7 +1,7 @@
 source "https://rubygems.org"
 
 gem "bcrypt", "~> 3.1"
-gem "delayed_job", "~> 4.1"
+gem "delayed_job_active_record", "~> 4.1"
 gem "faraday", :github => "lostisland/faraday", :branch => "master"
 gem "faraday_middleware", "~> 0.13.1"
 gem "pg", "~> 1.1"
