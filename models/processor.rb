@@ -6,14 +6,20 @@ class Processor
   end
 
   def process!
+    id = if @order.url_id == -1
+	   @order.url
+	 else
+	   @order.url_id
+	 end
+
     begin
       case @order.url_type
-      when :post
-	copy_post(@order.url_id, @order.pool_id)
-      when :wiki_page
-	copy_wiki_page(@order.url_id)
-      when :pool
-	copy_pool(@order.url_id)
+      when "post"
+	copy_post(id, @order.pool_id)
+      when "wiki_page"
+	copy_wiki_page(id)
+      when "pool"
+	copy_pool(id)
       else
 	[:failure, "unknown url type", nil]
       end
@@ -37,10 +43,12 @@ class Processor
     post.tags.each do |tag|
       # tag
       unless @client_to.find_tag_by_name(tag).success?
-	resp = @client_from.find_tag_by_name(tag)
-	return failure "could not find tag '#{tag}' in source", resp unless resp.success?
+	new_tag = @client_from.find_tag_by_name(tag)
+	if !new_tag.success?
+	  new_tag = Result.success(Tag.new(id: 0, name: tag, url: "", category: :general))
+	end
 
-	resp = @client_to.create_tag(tag)
+	resp = @client_to.create_tag(new_tag)
 	return failure "could not create tag '#{tag}' in sink", resp unless resp.success?
       end
 

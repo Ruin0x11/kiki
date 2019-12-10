@@ -23,13 +23,13 @@ class Client::Danbooru2Client < Client::BaseClient
     uri = URI.parse(uri) unless URI === uri
     return {type: nil, id: nil} unless URI.parse(@domain).host == uri.host
 
-    m = uri.path.match(/posts\/([0-9]+)$/)
+    m = uri.path.match(/posts\/([0-9]+)/)
     return {type: :post, id: m[1].to_i} if m
 
-    m = uri.path.match(/wiki_pages\/([0-9]+)$/)
+    m = uri.path.match(/wiki_pages\/([0-9]+)/)
     return {type: :wiki_page, id: m[1].to_i} if m
 
-    m = uri.path.match(/pools\/([0-9]+)$/)
+    m = uri.path.match(/pools\/([0-9]+)/)
     return {type: :post, id: m[1].to_i} if m
 
     {type: nil, id: nil}

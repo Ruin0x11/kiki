@@ -28,13 +28,13 @@ class Order < ActiveRecord::Base
     self.status = :pending
     save!
 
-    result, message = Processor.new(self).process!
+    result, message, resp = Processor.new(self).process!
 
     self.status = result
     self.message = message
     save!
 
-    puts "job result #{self.id}: #{self.status} #{self.message}"
+    puts "job result #{self.id}: #{self.status} #{self.message} #{resp and resp.body}"
   end
 
   private
@@ -49,5 +49,10 @@ class Order < ActiveRecord::Base
     data = server_from.client.parse_uri(url)
     self.url_type = data[:type]
     self.url_id = data[:id]
+    if self.url_id == nil
+      self.url_id = -1
+    end
+
+    puts "url parse #{data.inspect} #{self.url_type} #{self.url_id}"
   end
 end

@@ -20,6 +20,7 @@ class CreateModels < ActiveRecord::Migration[5.2]
       t.integer :status, null: false
       t.string :message
       t.string :pools
+      t.integer :shaarli_link_id
     end
 
     create_table :users do |t|

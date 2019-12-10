@@ -8,6 +8,7 @@ gem "pg", "~> 1.1"
 gem "rake", "~> 12.3"
 gem "sinatra", "~> 2.0"
 gem "sinatra-activerecord", "~> 2.0"
+gem "whenever", require: false
 
 group :test do
   gem "minitest", "~> 5.11"

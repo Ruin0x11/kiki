@@ -24,6 +24,7 @@ GEM
     backports (3.14.0)
     bcrypt (3.1.12)
     byebug (11.0.1)
+    chronic (0.10.2)
     concurrent-ruby (1.1.5)
     delayed_job (4.1.8)
       activesupport (>= 3.0, < 6.1)
@@ -81,6 +82,8 @@ GEM
     tilt (2.0.9)
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
+    whenever (1.0.0)
+      chronic (>= 0.6.3)
 
 PLATFORMS
   ruby
@@ -102,6 +105,7 @@ DEPENDENCIES
   sinatra (~> 2.0)
   sinatra-activerecord (~> 2.0)
   sinatra-reloader (~> 1.0)
+  whenever
 
 BUNDLED WITH
    2.0.2

@@ -19,7 +19,6 @@ namespace :db do
   end
 end
 
-
 namespace :jobs do
   desc "Clear the delayed_job queue."
   task :clear do
@@ -29,6 +28,13 @@ namespace :jobs do
   desc "Start a delayed_job worker."
   task :work do
     Delayed::Worker.new(:min_priority => ENV['MIN_PRIORITY'], :max_priority => ENV['MAX_PRIORITY']).start
+  end
+end
+
+namespace :import do
+  desc "Import from shaarli."
+  task :execute do
+    Importer.run! settings.import_post_count
   end
 end
 

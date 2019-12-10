@@ -13,13 +13,14 @@ class ProcessorTest < BaseTest
     @client_from.stubs(:has_pools?).returns(true)
     @client_to.stubs(:has_wiki_pages?).returns(true)
     @client_to.stubs(:has_pools?).returns(true)
+    @client_to.stubs(:url_id).returns(0)
 
     @p = Processor.new @order, @client_from, @client_to
   end
 
   def order_for(type, id)
     @order.expects(:url_type).returns(type)
-    @order.expects(:url_id).returns(id)
+    @order.expects(:url_id).returns(id).at_least_once
     @order.expects(:pool_id).returns(nil)
   end
 
@@ -40,7 +41,7 @@ class ProcessorTest < BaseTest
 
   context "with bad url" do
     should "fail processing" do
-      order_for :tag, 1
+      order_for "tag", 1
 
       status, mes, resp = @p.process!
 
@@ -52,7 +53,7 @@ class ProcessorTest < BaseTest
 
   context "with connection timeout" do
     should "timeout processing" do
-      order_for :post, 1
+      order_for "post", 1
 
       @client_from.expects(:get_post).raises(Faraday::TimeoutError)
 
@@ -66,7 +67,7 @@ class ProcessorTest < BaseTest
 
   context "with missing data" do
     should "fail getting post" do
-      order_for :post, 1
+      order_for "post", 1
 
       @client_from.expects(:get_post).returns(failure)
 
@@ -78,7 +79,7 @@ class ProcessorTest < BaseTest
     end
 
     should "fail getting wiki page" do
-      order_for :wiki_page, 1
+      order_for "wiki_page", 1
 
       @client_from.expects(:get_wiki_page).returns(failure)
 
@@ -90,7 +91,7 @@ class ProcessorTest < BaseTest
     end
 
     should "fail getting pool" do
-      order_for :pool, 1
+      order_for "pool", 1
 
       @client_from.expects(:get_pool).returns(failure)
 
@@ -104,7 +105,7 @@ class ProcessorTest < BaseTest
 
   context "copy_post" do
     setup do
-      order_for :post, 1
+      order_for "post", 1
       post = Post.new(url: "https://source/posts/1.json",
 		      id: 1,
 		      source: "https://source/file.png",
@@ -205,13 +206,16 @@ class ProcessorTest < BaseTest
 	  @client_to.expects(:find_tag_by_name).returns(failure)
 	end
 
-	should "fail if tag not found in source" do
+	should "create tag if tag not found in source" do
 	  @client_from.expects(:find_tag_by_name).returns(failure)
+	  @client_to.expects(:create_tag).returns(success(Tag.new))
+	  @client_to.expects(:find_wiki_page_by_name).returns(success(WikiPage.new))
+	  @client_to.expects(:upload_post).returns(success(Post.new))
 
 	  status, mes, resp = @p.process!
 
-	  assert_equal :failure, status
-	  assert_equal "could not find tag 'tag1' in source", mes
+	  assert_equal :success, status, mes
+	  assert_nil mes
 	  refute_nil resp
 	end
 
@@ -298,7 +302,7 @@ class ProcessorTest < BaseTest
 
   context "copy_wiki_page" do
     setup do
-      order_for :wiki_page, 1
+      order_for "wiki_page", 1
       wiki_page = WikiPage.new(url: "https://source/wiki_pages/1.json",
 			       id: 1,
 			       title: "title",

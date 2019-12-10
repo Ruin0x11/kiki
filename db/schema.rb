@@ -43,6 +43,7 @@ ActiveRecord::Schema.define(version: 2019_05_13_205058) do
     t.integer "status", null: false
     t.string "message"
     t.string "pools"
+    t.integer "shaarli_link_id"
   end
 
   create_table "servers", force: :cascade do |t|

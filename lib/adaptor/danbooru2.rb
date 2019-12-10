@@ -1,19 +1,27 @@
 class Adaptor::Danbooru2Adaptor < Adaptor::BaseAdaptor
   def post(resp)
-    Post.new(url: resp.env.url.to_s,
+    tags = resp.body["tag_string"].split(" ")
+    tags << "imported"
+    tags << "imported:danbooru"
+
+    Post.new(url: resp.env.url.to_s.gsub(/\.json$/, ""),
 	     id: resp.body["id"],
 	     source: resp.body["source"],
 	     image_url: resp.body["large_file_url"],
-	     tags: resp.body["tag_string"].split(" "),
+	     tags: tags,
 	     rating: resp.body["rating"].to_sym)
   end
 
   def upload(resp)
-    Post.new(url: resp.env.url.to_s,
+    tags = resp.body["tag_string"].split(" ")
+    tags << "imported"
+    tags << "imported:danbooru"
+
+    Post.new(url: resp.env.url.to_s.gsub(/\.json$/, ""),
 	     id: resp.body["post_id"],
 	     source: resp.body["source"],
 	     image_url: nil,
-	     tags: resp.body["tag_string"].split(" "),
+	     tags: tags,
 	     rating: resp.body["rating"].to_sym)
   end
 
@@ -22,7 +30,7 @@ class Adaptor::Danbooru2Adaptor < Adaptor::BaseAdaptor
     if Array === result
       result = result.first
     end
-    WikiPage.new(url: resp.env.url.to_s,
+    WikiPage.new(url: resp.env.url.to_s.gsub(/\.json$/, ""),
 		 id: result["id"],
 		 title: result["title"],
 		 body: result["body"],
@@ -47,6 +55,8 @@ class Adaptor::Danbooru2Adaptor < Adaptor::BaseAdaptor
       :copyright
     when 4
       :character
+    when 5
+      :meta
     else
       :unknown
     end

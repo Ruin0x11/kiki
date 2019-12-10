@@ -40,6 +40,18 @@ class Client::Danbooru2ClientTest < BaseTest
     @client.conn.expects(:post).with(url, req).returns(response)
   end
 
+  def test_parse_uri
+    res = @client.parse_uri("https://danbooru.donmai.us/posts/2234129")
+    assert_equal :post, res[:type]
+    assert_equal 2234129, res[:id]
+  end
+
+  def test_parse_uri_2
+    res = @client.parse_uri("https://danbooru.donmai.us/posts/3477823/")
+    assert_equal :post, res[:type]
+    assert_equal 3477823, res[:id]
+  end
+
   def test_get_post
     setup_response "danbooru2/post.json", "/posts/1077187.json"
 
@@ -49,7 +61,7 @@ class Client::Danbooru2ClientTest < BaseTest
     assert_equal "the_url", post.url
     assert_equal "http://img04.pixiv.net/img/syounen_no_uta/24425315.jpg", post.source
     assert_equal "https://raikou2.donmai.us/f6/fe/f6fe71488d890586afda9ee610f103c9.jpg", post.image_url
-    assert_equal 30, post.tags.length
+    assert_equal 32, post.tags.length
     assert_instance_of String, post.tags.first
     assert_equal :s, post.rating
   end
@@ -120,7 +132,7 @@ class Client::Danbooru2ClientTest < BaseTest
     assert_equal "the_url", upload.url
     assert_equal 1, upload.id
     assert_equal "http://img04.pixiv.net/img/syounen_no_uta/24425315.jpg", upload.source
-    assert_equal ["1girl", "amazon_(company)"], upload.tags
+    assert_equal ["1girl", "amazon_(company)", "imported", "imported:danbooru"], upload.tags
     assert_equal :s, upload.rating
   end
 
@@ -145,7 +157,7 @@ class Client::Danbooru2ClientTest < BaseTest
     assert_equal "the_url", upload.url
     assert_equal 1, upload.id
     assert_equal "http://img04.pixiv.net/img/syounen_no_uta/24425315.jpg", upload.source
-    assert_equal ["1girl", "amazon_(company)"], upload.tags
+    assert_equal ["1girl", "amazon_(company)", "imported", "imported:danbooru"], upload.tags
     assert_equal :s, upload.rating
   end
 

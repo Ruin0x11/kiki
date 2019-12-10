@@ -44,10 +44,9 @@ class Client::SzurubooruClient < Client::BaseClient
 
   def upload_post(post)
     metadata = {
-      "source" => post.source,
+      "source" => post.url, # post.source,
       "tags" => post.tags,
       "safety" => @ada.rating_from(post.rating),
-      "contentUrl" => post.image_url
     }
 
     image = @conn.get do |req|
