@@ -8,14 +8,14 @@ class Client::Danbooru2Client < Client::BaseClient
     super
 
     @ada = Adaptor::Danbooru2Adaptor.new
-    @conn = Faraday.new(url: "https://#{domain}") do |faraday|
+    @conn = Faraday.new(url: domain) do |faraday|
       faraday.request :json
       faraday.response :json, content_type: /\bjson$/
       faraday.basic_auth username, auth
 
       faraday.use Faraday::Request::Retry
       faraday.use Faraday::Response::Logger
-      faraday.use Faraday::Adapter::NetHttp
+      faraday.adapter Faraday::Adapter::NetHttp
     end
   end
 
@@ -35,6 +35,14 @@ class Client::Danbooru2Client < Client::BaseClient
     {type: nil, id: nil}
   end
 
+  def has_wiki_pages?
+    true
+  end
+
+  def has_pools?
+    true
+  end
+
   def get_post(id)
     r = @conn.get "/posts/#{id}.json"
     Result.make(r) { |resp| @ada.post(resp) }
@@ -51,6 +59,7 @@ class Client::Danbooru2Client < Client::BaseClient
 
   def get_tag(id)
     r = @conn.get "/tags/#{id}.json"
+    return Result.failure(r) if r.body.empty?
     Result.make(r) { |resp| @ada.tag(resp) }
   end
 

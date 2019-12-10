@@ -2,17 +2,19 @@ class Adaptor::Danbooru2Adaptor < Adaptor::BaseAdaptor
   def post(resp)
     Post.new(url: resp.env.url.to_s,
 	     id: resp.body["id"],
-	     source: resp.body["large_file_url"],
+	     source: resp.body["source"],
+	     image_url: resp.body["large_file_url"],
 	     tags: resp.body["tag_string"].split(" "),
-	     rating: resp.body["rating"])
+	     rating: resp.body["rating"].to_sym)
   end
 
   def upload(resp)
     Post.new(url: resp.env.url.to_s,
 	     id: resp.body["post_id"],
 	     source: resp.body["source"],
+	     image_url: nil,
 	     tags: resp.body["tag_string"].split(" "),
-	     rating: resp.body["rating"])
+	     rating: resp.body["rating"].to_sym)
   end
 
   def wiki_page(resp)
@@ -25,6 +27,14 @@ class Adaptor::Danbooru2Adaptor < Adaptor::BaseAdaptor
 		 title: result["title"],
 		 body: result["body"],
 		 other_names: result["other_names"])
+  end
+
+  def rating(rating)
+    rating
+  end
+
+  def rating_from(rating)
+    rating
   end
 
   def tag_category(category)

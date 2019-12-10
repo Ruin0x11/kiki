@@ -15,6 +15,14 @@ class Client::BaseClient
     {type: nil, id: nil}
   end
 
+  def has_wiki_pages?
+    not_implemented
+  end
+
+  def has_pools?
+    not_implemented
+  end
+
   def get_post(id)
     not_implemented
   end
@@ -81,3 +89,4 @@ end
 require "lib/client/danbooru"
 require "lib/client/danbooru2"
 require "lib/client/gelbooru"
+require "lib/client/szurubooru"

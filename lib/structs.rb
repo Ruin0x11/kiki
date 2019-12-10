@@ -1,4 +1,4 @@
-Post = Struct.new :id, :url, :source, :tags, :rating, :parent_id, keyword_init: true
+Post = Struct.new :id, :url, :source, :image_url, :tags, :rating, :parent_id, keyword_init: true
 
 WikiPage = Struct.new :id, :url, :title, :body, :other_names, keyword_init: true
 

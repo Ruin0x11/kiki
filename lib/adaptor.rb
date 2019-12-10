@@ -15,6 +15,13 @@ class Adaptor::BaseAdaptor
 
   def pool(resp)
   end
+
+  def rating(rating)
+  end
+
+  def rating_from(rating)
+  end
 end
 
 require "lib/adaptor/danbooru2"
+require "lib/adaptor/szurubooru"

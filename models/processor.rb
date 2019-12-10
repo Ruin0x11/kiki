@@ -25,7 +25,7 @@ class Processor
   end
 
   def copy_post(id, pool_id = nil)
-    if pool_id != nil
+    if @client_to.has_pools? and pool_id != nil
       resp = @client_to.get_pool(id)
       return failure "could not find pool '#{pool_id}' in sink", resp unless resp.success?
     end
@@ -45,11 +45,13 @@ class Processor
       end
 
       # wiki page
-      unless @client_to.find_wiki_page_by_name(tag).success?
-	resp = @client_from.find_wiki_page_by_name(tag)
-	if resp.success?
-	  resp = @client_to.create_wiki_page(resp.result)
-	  return failure "could not create wiki page '#{tag}' in sink", resp unless resp.success?
+      if @client_to.has_wiki_pages?
+	unless @client_to.find_wiki_page_by_name(tag).success?
+	  resp = @client_from.find_wiki_page_by_name(tag)
+	  if resp.success?
+	    resp = @client_to.create_wiki_page(resp.result)
+	    return failure "could not create wiki page '#{tag}' in sink", resp unless resp.success?
+	  end
 	end
       end
     end
@@ -58,7 +60,7 @@ class Processor
     return failure "could not upload post '#{post.source}' to sink", resp unless resp.success?
     upload = resp.result
 
-    if pool_id != nil
+    if @client_to.has_pools? and pool_id != nil
       resp = @client_to.add_post_to_pool(pool_id, upload)
       return failure "could not add post '#{post.source}' to pool '#{pool_id}' in sink", resp unless resp.success?
     end

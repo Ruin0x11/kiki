@@ -1,5 +1,3 @@
-# -*- coding: cp932 -*-
-
 require "models/init"
 require "routes/init"
 
