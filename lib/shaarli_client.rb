@@ -21,19 +21,19 @@ class ShaarliClient
   def update_link(link_id, **params)
     args = []
     if params[:title]
-      args << "--title '#{params[:title].join(' ')}'"
+      args << "--title \"#{params[:title].join(' ')}\""
     end
     if params[:private] == true
       args << "--private"
     end
     if params[:description]
-      args << "--description '#{params[:description].join(' ')}'"
+      args << "--description \"#{params[:description].join(' ')}\""
     end
     if params[:tags]
       args << "--tags #{params[:tags].join(' ')}"
     end
     if params[:url]
-      args << "--url '#{params[:url]}'"
+      args << "--url \"#{params[:url]}\""
     end
     args << link_id.to_s
     request "put-link", args

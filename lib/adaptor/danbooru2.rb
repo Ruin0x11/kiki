@@ -7,7 +7,7 @@ class Adaptor::Danbooru2Adaptor < Adaptor::BaseAdaptor
     Post.new(url: resp.env.url.to_s.gsub(/\.json$/, ""),
 	     id: resp.body["id"],
 	     source: resp.body["source"],
-	     image_url: resp.body["large_file_url"],
+	     image_url: resp.body["file_url"],
 	     tags: tags,
 	     rating: resp.body["rating"].to_sym)
   end

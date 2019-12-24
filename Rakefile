@@ -34,7 +34,7 @@ end
 namespace :import do
   desc "Import from shaarli."
   task :execute do
-    Importer.run! settings.import_post_count
+    Importer.new(settings.shaarli_instance).run! settings.import_post_count
   end
 end
 
