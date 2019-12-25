@@ -1,18 +1,17 @@
-# Readme
-This is a basic sinatra template, which you can use as a base for your projects.
+# kiki
+A Danbooru2 to [szurubooru](https://github.com/rr-/szurubooru) mass post importer. Automatically adds new tags if they are missing.
 
-Fork this app onto your github account using the 'fork' button in the top right, from there
-clone it onto your machine either with the command line or github desktop.
+## Notes
+- The code is specific to my needs and hardcodes a few constants. It is provided as-is. More work is needed for out of the box use.
+- The necessary tags that Danbooru2 provides must be set up in szurubooru first before importing anything.
+- Only the Danbooru2-to-szurubooru scenario is fully supported. There is preliminary code for using a few other sites as sources.
+- Since szurubooru does not support pools or artist commentary, there is no ability to import them yet.
 
-### Running the app
-From the root off the app type `ruby app.rb`
+## Usage
+```
+bundle install
+bundle exec rake jobs:work
 
-### Routing
-Routes should be added to the app.rb file
-
-### Views
-Add any views you wish to the 'veiws' directory, make sure these are '.erb' files, and not '.html'
-
-### Styles, JS and images
-These should all be added to the 'public' directory, make sure you link them approriately to the templates in the view directory!
-
+# example import task, needs customization
+bundle exec import:execute
+```
