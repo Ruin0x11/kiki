@@ -10,6 +10,7 @@ class Server < ActiveRecord::Base
   def self.find_matching(url)
     uri = URI.parse(url)
     server = Server.find_by_domain(uri.scheme + "://" + uri.host)
+    server ||= Server.find_by_domain("https://" + uri.host)
     return server unless server.nil?
 
     if Server.url_is_image? url
@@ -37,10 +38,14 @@ class Server < ActiveRecord::Base
   private
 
   def self.url_is_image?(url)
-    resp = Faraday.get(url)
-    if resp.success?
-      pp resp.headers["Content-Type"]
-      return resp.headers["Content-Type"].start_with? "image"
+    begin
+      resp = Faraday.get(url)
+      if resp.success?
+        pp resp.headers["Content-Type"]
+        return resp.headers["Content-Type"].start_with? "image"
+      end
+    rescue
+      return false
     end
   end
 end

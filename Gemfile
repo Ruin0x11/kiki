@@ -9,6 +9,9 @@ gem "rake", "~> 12.3"
 gem "sinatra", "~> 2.0"
 gem "sinatra-activerecord", "~> 2.0"
 gem "whenever", require: false
+gem "e2mmap"
+gem "mimemagic"
+gem "nokogiri"
 
 group :test do
   gem "minitest", "~> 5.11"

@@ -12,5 +12,5 @@ Delayed::Worker.max_attempts = 5
 Delayed::Worker.max_run_time = 5.minutes
 
 set :logger, Logger.new(STDERR)
-set :import_post_count, 1000
+set :import_post_count, 50000
 set :shaarli_instance, "nori"
