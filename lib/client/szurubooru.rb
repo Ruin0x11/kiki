@@ -4,6 +4,8 @@ require "base64"
 require "faraday/param_part"
 require "stringio"
 
+require "lib/client/szurubooru/connection"
+
 class Client::SzurubooruClient < Client::BaseClient
   attr_reader :conn
 
@@ -11,17 +13,7 @@ class Client::SzurubooruClient < Client::BaseClient
     super
 
     @ada = Adaptor::SzurubooruAdaptor.new
-    @conn = Faraday.new(url: domain) do |faraday|
-      faraday.request :json
-      faraday.request :multipart
-      faraday.response :json, content_type: "application/json"
-      faraday.authorization :Token, Base64.strict_encode64("#{username}:#{auth}")
-      faraday.headers["Accept"] = "application/json"
-
-      faraday.use Faraday::Request::Retry
-      faraday.use Faraday::Response::Logger
-      faraday.adapter Faraday::Adapter::NetHttp
-    end
+    @conn = Connection.new(domain, username, auth)
   end
 
   def parse_uri(uri)
@@ -40,6 +32,22 @@ class Client::SzurubooruClient < Client::BaseClient
 
   def has_pools?
     false
+  end
+
+  # Search posts
+  #
+  # @param query [String] Search term and qualifiers
+  # @param options [Hash] Sort and pagination options
+  # @option options [Integer] :offset Post offset for pagination.
+  # @option options [Integer] :limit Number of items per page
+  # @return [Faraday::Response] Search results object
+  def search_posts(query, options = {})
+    r = search "/api/posts", query, options
+    Result.make(r) do |resp|
+      resp.body["results"].map do |post|
+	@ada.post(post, URI.parse("#{@domain}/post/#{post['id']}"))
+      end
+    end
   end
 
   def upload_post(post)
@@ -78,5 +86,24 @@ class Client::SzurubooruClient < Client::BaseClient
   def create_tag(tag)
     r = @conn.post "/api/tags", { "names" => [tag.name], "category" => tag.category }
     Result.make(r) { |resp| @ada.tag(resp) }
+  end
+
+  def update_post(post)
+    r = @conn.put "/api/post/#{post.id}", {
+      "version" => post.version,
+      "source" => post.url, # post.source,
+      "tags" => post.tags,
+      "safety" => @ada.rating_from(post.rating),
+    }
+    Result.make(r) { |resp| @ada.post(resp) }
+  end
+
+  private
+
+  def search(path, query, options = {})
+    opts = options.merge("query" => query)
+    @conn.paginate(path, opts) do |data, last_response|
+      data.items.concat last_response.data.items
+    end
   end
 end

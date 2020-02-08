@@ -14,3 +14,5 @@ Delayed::Worker.max_run_time = 5.minutes
 set :logger, Logger.new(STDERR)
 set :import_post_count, 50000
 set :shaarli_instance, "nori"
+set :iqdb_delay_secs, 60 * 10
+set :iqdb_similarity_threshold, 90

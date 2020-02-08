@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_05_13_205058) do
+ActiveRecord::Schema.define(version: 2020_02_08_011137) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -53,6 +53,8 @@ ActiveRecord::Schema.define(version: 2019_05_13_205058) do
     t.integer "api_type", null: false
     t.string "username", null: false
     t.string "auth", null: false
+    t.string "scheme", default: "https", null: false
+    t.index ["domain"], name: "index_servers_on_domain", unique: true
   end
 
   create_table "users", force: :cascade do |t|

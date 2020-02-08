@@ -31,6 +31,10 @@ class Client::BaseClient
     not_implemented
   end
 
+  def update_post(post)
+    not_implemented
+  end
+
   def get_tag(id)
     not_implemented
   end

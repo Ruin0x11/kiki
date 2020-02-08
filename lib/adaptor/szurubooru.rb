@@ -1,11 +1,17 @@
 class Adaptor::SzurubooruAdaptor < Adaptor::BaseAdaptor
-  def post(resp)
-    Post.new(url: resp.env.url.to_s,
-	     id: resp.body["id"],
-	     source: resp.body["source"],
-	     image_url: "#{resp.env.url.scheme}://#{resp.env.url.host}/#{resp.body['contentUrl']}",
-	     tags: resp.body["tags"].map { |t| t["names"][0] } ,
-	     rating: rating(resp.body["safety"].to_sym))
+  def post(resp, url = nil)
+    body = resp
+    if Faraday::Response === resp
+      body = resp.body
+      url = resp.env.url
+    end
+    Post.new(url: url.to_s,
+	     id: body["id"],
+	     source: body["source"],
+	     image_url: "#{url.scheme}://#{url.host}/#{body["contentUrl"]}",
+	     tags: body["tags"].map { |t| t["names"][0] } ,
+	     rating: rating(body["safety"].to_sym),
+	     version: body["version"])
   end
 
   def upload(resp)

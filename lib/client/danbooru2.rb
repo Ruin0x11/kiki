@@ -21,8 +21,9 @@ class Client::Danbooru2Client < Client::BaseClient
 
   def parse_uri(uri)
     uri = URI.parse(uri) unless URI === uri
-    return {type: nil, id: nil} unless URI.parse(@domain).host == uri.host
+    return {type: nil, id: nil} unless @domain.host == uri.host
 
+    pp uri
     m = uri.path.match(/posts\/([0-9]+)/)
     return {type: :post, id: m[1].to_i} if m
 

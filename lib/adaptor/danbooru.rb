@@ -1,4 +1,4 @@
-class Adaptor::Danbooru2Adaptor < Adaptor::BaseAdaptor
+class Adaptor::DanbooruAdaptor < Adaptor::BaseAdaptor
   def post(resp, url = nil)
     body = resp
     if Faraday::Response === resp
@@ -6,11 +6,19 @@ class Adaptor::Danbooru2Adaptor < Adaptor::BaseAdaptor
       url = resp.env.url
     end
 
-    tags = body["tag_string"].split(" ")
-    tags << "imported"
-    tags << "imported:danbooru"
+    if Array === body
+      raise "more than one result" if body.size > 1
+      body = body.first
+    end
 
-    Post.new(url: url.to_s.gsub(/\.json$/, ""),
+    url = url.clone
+    url.path = "/post/show/#{body['id']}"
+
+    tags = body["tags"].split(" ")
+    tags << "imported"
+    tags << "imported:danbooru1"
+
+    Post.new(url: url,
 	     id: body["id"],
 	     source: body["source"],
 	     image_url: body["file_url"],
@@ -18,29 +26,20 @@ class Adaptor::Danbooru2Adaptor < Adaptor::BaseAdaptor
 	     rating: body["rating"].to_sym)
   end
 
-  def upload(resp)
-    tags = resp.body["tag_string"].split(" ")
-    tags << "imported"
-    tags << "imported:danbooru"
-
-    Post.new(url: resp.env.url.to_s.gsub(/\.json$/, ""),
-	     id: resp.body["post_id"],
-	     source: resp.body["source"],
-	     image_url: nil,
-	     tags: tags,
-	     rating: resp.body["rating"].to_sym)
-  end
-
   def wiki_page(resp)
-    result = resp.body
-    if Array === result
-      result = result.first
+    body = resp.body
+    if Array === body
+      body = body.first
     end
+
+    url = resp.env.url.clone
+    url.path = "/wiki/show?title=#{body['id']}"
+
     WikiPage.new(url: resp.env.url.to_s.gsub(/\.json$/, ""),
-		 id: result["id"],
-		 title: result["title"],
-		 body: result["body"],
-		 other_names: result["other_names"])
+		 id: body["id"],
+		 title: body["title"],
+		 body: body["body"],
+		 other_names: body["other_names"])
   end
 
   def rating(rating)

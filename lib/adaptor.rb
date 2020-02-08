@@ -23,5 +23,6 @@ class Adaptor::BaseAdaptor
   end
 end
 
+require "lib/adaptor/danbooru"
 require "lib/adaptor/danbooru2"
 require "lib/adaptor/szurubooru"

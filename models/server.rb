@@ -7,13 +7,12 @@ class Server < ActiveRecord::Base
 
   has_many :orders
 
-  def self.find_matching(url)
-    uri = URI.parse(url)
-    server = Server.find_by_domain(uri.scheme + "://" + uri.host)
-    server ||= Server.find_by_domain("https://" + uri.host)
+  def self.find_matching(uri)
+    uri = URI.parse(uri) unless URI === uri
+    server = Server.find_by_domain(uri.host)
     return server unless server.nil?
 
-    if Server.url_is_image? url
+    if Server.url_is_image? uri
       return Server.find_by_api_type("image")
     end
 
@@ -21,17 +20,19 @@ class Server < ActiveRecord::Base
   end
 
   def client
+    domain_ = URI.parse(scheme + "://" + domain)
+
     @client ||= case self.api_type.to_sym
 		when :danbooru
-    Client::DanbooruClient.new(domain, username, auth)
+    Client::DanbooruClient.new(domain_, username, auth)
 		when :danbooru2
-    Client::Danbooru2Client.new(domain, username, auth)
+    Client::Danbooru2Client.new(domain_, username, auth)
 		when :gelbooru
-    Client::GelbooruClient.new(domain, username, auth)
+    Client::GelbooruClient.new(domain_, username, auth)
 		when :szurubooru
-    Client::SzurubooruClient.new(domain, username, auth)
+    Client::SzurubooruClient.new(domain_, username, auth)
 		when :image
-    Client::ImageClient.new(domain, username, auth)
+    Client::ImageClient.new(domain_, username, auth)
 		end
   end
 

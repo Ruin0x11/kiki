@@ -7,8 +7,9 @@ class Importer
     @client = ShaarliClient.new(instance)
   end
 
-  def run!(count)
-    links = @client.links(tags: ["b"], limit: count).map { |i| OpenStruct.new i }.reverse
+  def run!(count, tags = nil)
+    tags ||= ["b"]
+    links = @client.links(tags: tags, limit: count).map { |i| OpenStruct.new i }.reverse
 
     user = User.find_by_name("ruin")
     raise "Unable to find user" if user.nil?
@@ -30,19 +31,21 @@ class Importer
 			   url: url,
 			   status: :created)
 
-      tags = link.tags
-      tags.delete("b")
+      link_tags = link.tags
+
+      tags.each { |t| link_tags.delete(t) }
 
       if order.valid?
 	puts "imported shaarli link (#{link.id}): #{url}"
-	tags << "b_imported"
+	link_tags << "b_imported"
+	link.description = ""
       else
 	puts "could not create import job (#{link.id}): #{url} #{order.errors.full_messages}"
-	tags << "b_failed"
+	link_tags << "b_failed"
 	link.description = order.errors.full_messages
       end
 
-      @client.update_link(link.id, title: [link.title], description: [link.description], tags: tags, private: link.private, url: url)
+      @client.update_link(link.id, title: [link.title], description: [link.description], tags: link_tags, private: link.private, url: url)
     end
   end
 end
