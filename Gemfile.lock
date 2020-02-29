@@ -59,7 +59,7 @@ GEM
     racksh (1.0.0)
       rack (>= 1.0)
       rack-test (>= 0.5)
-    rake (12.3.2)
+    rake (12.3.3)
     shoulda (3.6.0)
       shoulda-context (~> 1.0, >= 1.0.1)
       shoulda-matchers (~> 3.0)
