@@ -6,7 +6,7 @@ gem "faraday", :github => "lostisland/faraday", :branch => "master"
 gem "faraday_middleware", "~> 0.13.1"
 gem "pg", "~> 1.1"
 gem "rake", "~> 12.3"
-gem "sinatra", "~> 2.0"
+gem "sinatra", "~> 2.2"
 gem "sinatra-activerecord", "~> 2.0"
 gem "whenever", require: false
 gem "e2mmap"
